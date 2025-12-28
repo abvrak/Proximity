@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css';
 
-// TUTAJ WKLEJ SWÓJ TOKEN Z MAPBOX.COM
+// TOKEN Z MAPBOX.COM
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2FpbW9iIiwiYSI6ImNtanBuMTNwMTFxamcza3NkMXJhamx0MXcifQ.VCUDPf77833_gXe8CTkGVw';
 
 function App() {

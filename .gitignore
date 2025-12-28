@@ -7,7 +7,7 @@ __pycache__/
 __pycache__
 *.py[cod]
 *$py.class
-.env
+#.env  <- póki co niech będzie w repo, po dodaniu na produkcje trzeba usunac
 .venv/
 
 # Node / Frontend

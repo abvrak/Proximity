@@ -22,8 +22,8 @@ jupyter = "jupyter lab notebooks/"
 
 # --- Database Tasks (Docker) ---
 # Zakładam, że utworzysz docker-compose.db.yml dla PostGISa
-db-up = "docker-compose -f docker-compose.yml up -d"
-db-down = "docker-compose -f docker-compose.yml down"
+db-up = "docker compose -f docker-compose.yml up -d"
+db-down = "docker compose -f docker-compose.yml down"
 
 [dependencies]
 python = ">=3.14.2,<3.15"
