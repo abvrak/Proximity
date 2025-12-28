@@ -1,0 +1,45 @@
+[workspace]
+authors = ["MaksHubertDabrowski <MaksDabrowski@hotmail.com>"]
+channels = ["conda-forge"]
+name = "Proximity"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+# --- Backend Tasks ---
+# Uruchomienie serwera developerskiego (zakładając, że plik startowy to backend/main.py)
+start-backend = "uvicorn backend.main:app --reload --port 8000"
+
+# --- Frontend Tasks ---
+# Instalacja zależności w folderze frontend (używając npm z pixi)
+install-frontend = { cmd = "npm install", cwd = "frontend" }
+# Start Reacta
+start-frontend = { cmd = "npm start", cwd = "frontend" }
+
+# --- Data/Notebook Tasks ---
+# Uruchomienie Jupytera w środowisku Pixi
+jupyter = "jupyter lab notebooks/"
+
+# --- Database Tasks (Docker) ---
+# Zakładam, że utworzysz docker-compose.db.yml dla PostGISa
+db-up = "docker-compose -f docker-compose.yml up -d"
+db-down = "docker-compose -f docker-compose.yml down"
+
+[dependencies]
+python = ">=3.14.2,<3.15"
+fastapi = ">=0.128.0,<0.129"
+uvicorn = ">=0.40.0,<0.41"
+sqlalchemy = ">=2.0.45,<3"
+geoalchemy2 = ">=0.18.1,<0.19"
+asyncpg = ">=0.31.0,<0.32"
+pydantic-settings = ">=2.12.0,<3"
+beautifulsoup4 = ">=4.14.3,<5"
+httpx = ">=0.28.1,<0.29"
+lxml = ">=6.0.2,<7"
+geopandas = ">=1.1.2,<2"
+shapely = ">=2.1.2,<3"
+nodejs = ">=25.2.1,<25.3"
+
+[pypi-dependencies]
+ruff = ">=0.14.10, <0.15"
+pytest = ">=9.0.2, <10"
