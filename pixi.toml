@@ -14,7 +14,8 @@ start-backend = "uvicorn backend.main:app --reload --port 8000"
 # Instalacja zależności w folderze frontend (używając npm z pixi)
 install-frontend = { cmd = "npm install", cwd = "frontend" }
 # Start Reacta
-start-frontend = { cmd = "npm start", cwd = "frontend" }
+# Używamy `npm --prefix frontend run dev` żeby uniknąć polegania na cwd
+start-frontend = "npm --prefix frontend run dev"
 
 # --- Data/Notebook Tasks ---
 # Uruchomienie Jupytera w środowisku Pixi

@@ -26,3 +26,23 @@ yarn-error.log*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Logs
+logs
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build / dist
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
