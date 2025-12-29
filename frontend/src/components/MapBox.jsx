@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import './MapBox.css';
 
 export default function MapBox() {
   const mapContainer = useRef(null);
@@ -35,5 +36,5 @@ export default function MapBox() {
     };
   }, []);
 
-  return <div ref={mapContainer} style={{ width: '100%', height: '100vh' }} />;
+  return <div ref={mapContainer} className="map-container" />;
 }
