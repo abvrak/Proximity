@@ -8,4 +8,3 @@ The platform automates the analysis of urban amenities and disamenities by proce
 * **Frontend:** React.js + Mapbox GL JS
 * **Backend:** Python FastAPI
 * **Database:** PostgreSQL + PostGIS
-
