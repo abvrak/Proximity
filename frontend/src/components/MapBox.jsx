@@ -20,7 +20,7 @@ export default function MapBox() {
     // Utwórz mapę
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [lng, lat],
       zoom: zoom,
       pitch: 45, // Kąt nachylenia dla efektu 3D
