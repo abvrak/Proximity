@@ -1,21 +1,50 @@
-version: "3.8"
+version: '3.8'
+
 services:
+  # --- Baza Danych (PostgreSQL + PostGIS) ---
   db:
-    image: postgis/postgis:15-3.4
-    restart: unless-stopped
+    image: postgis/postgis:15-3.3
+    container_name: proximity_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=proximity
+      - POSTGRES_PASSWORD=super_tajne_haslo
+      - POSTGRES_DB=proximity_db
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # --- Backend (FastAPI) ---
+  backend:
+    build: ./backend
+    container_name: proximity_backend
+    volumes:
+      - ./backend:/app  # Hot-reloading: zmiany w kodzie na Windowsie odświeżą kontener
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/proximity_db
+    depends_on:
+      - db
+
+  # --- Frontend (React) ---
+  frontend:
+    build: ./frontend
+    container_name: proximity_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Zapobiega nadpisaniu modułów wewnątrz kontenera przez lokalny folder
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true # WAŻNE dla Windowsa: naprawia hot-reloading w React
+      - WDS_SOCKET_PORT=0 
+      - REACT_APP_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    depends_on:
+      - backend
+    stdin_open: true # Ważne dla Reacta w Dockerze
+    tty: true
 
 volumes:
-  db_data:
+  postgres_data:

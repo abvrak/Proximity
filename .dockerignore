@@ -1,0 +1,9 @@
+node_modules
+__pycache__
+.git
+.env
+pixi.lock
+.venv
+venv
+dist
+build

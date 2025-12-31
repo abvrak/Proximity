@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css';
 
 // TOKEN Z MAPBOX.COM
-mapboxgl.accessToken = 'pk.eyJ1IjoiY2FpbW9iIiwiYSI6ImNtanBuMTNwMTFxamcza3NkMXJhamx0MXcifQ.VCUDPf77833_gXe8CTkGVw';
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
 function App() {
   const mapContainer = useRef(null);

@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+psycopg2-binary
+asyncpg
+sqlalchemy
+geoalchemy2
+httpx
+python-dotenv
+pydantic-settings
+beautifulsoup4
+lxml
+# Biblioteki GIS (kluczowe z pixi.toml)
+geopandas
+shapely
