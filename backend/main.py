@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from backend.api.routes.contact import router as contact_router
 
 app = FastAPI(
     title="Proximity API",
@@ -11,7 +12,8 @@ app = FastAPI(
 # Konfiguracja CORS (kluczowe, żeby React mógł gadać z Pythonem)
 origins = [
     "http://localhost:3000",  # Domyślny port Reacta
-    "http://localhost:5173",  # Alternatywny port (Vite)
+    "http://localhost:5173",  # Vite dev
+    "http://localhost:4173",  # Vite preview
 ]
 
 app.add_middleware(
@@ -22,18 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"status": "online", "message": "Proximity API działa!"}
-
-@app.get("/api/test-location")
-def get_test_location():
-    # Tymczasowy endpoint zwracający współrzędne (np. Pałac Kultury)
-    return {
-        "lat": 52.2319, 
-        "lng": 21.0067, 
-        "name": "Przykładowa lokalizacja"
-    }
+app.include_router(contact_router)
 
 if __name__ == "__main__":
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)

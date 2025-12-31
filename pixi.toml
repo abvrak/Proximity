@@ -1,24 +1,21 @@
 [workspace]
-authors = ["MaksHubertDabrowski <MaksDabrowski@hotmail.com>"]
+authors = ["MaksHubertDabrowski <MaksDabrowski@hotmail.com>",
+           "abvrak <bitruut@gmail.com>"]
 channels = ["conda-forge"]
 name = "Proximity"
 platforms = ["win-64"]
 version = "0.1.0"
 
 [tasks]
-# --- Backend Tasks ---
-# Uruchomienie serwera developerskiego (zakładając, że plik startowy to backend/main.py)
-start-backend = "uvicorn backend.main:app --reload --port 8000"
-
 # --- Frontend Tasks ---
 # Instalacja zależności w folderze frontend (używając npm z pixi)
 install-frontend = { cmd = "npm install", cwd = "frontend" }
 # Start Reacta
-start-frontend = { cmd = "npm start", cwd = "frontend" }
+start-frontend = { cmd = "npm run dev", cwd = "frontend" }
 
-# --- Data/Notebook Tasks ---
-# Uruchomienie Jupytera w środowisku Pixi
-jupyter = "jupyter lab notebooks/"
+# --- Backend Tasks ---
+# Uruchomienie serwera developerskiego (plik startowy to backend/main.py)
+start-backend = "uvicorn backend.main:app --reload --port 8000"
 
 # --- Database Tasks (Docker) ---
 # Zakładam, że utworzysz docker-compose.db.yml dla PostGISa
