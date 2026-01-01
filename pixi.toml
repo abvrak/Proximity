@@ -16,6 +16,8 @@ start-frontend = { cmd = "npm run dev", cwd = "frontend" }
 # --- Backend Tasks ---
 # Uruchomienie serwera developerskiego (plik startowy to backend/main.py)
 start-backend = "uvicorn backend.main:app --reload --port 8000"
+# Instalacja przeglądarek dla Playwright (python)
+install-playwright-browsers = "python -m playwright install chromium"
 
 # --- Database Tasks (Docker) ---
 # Zakładam, że utworzysz docker-compose.db.yml dla PostGISa
@@ -35,8 +37,9 @@ httpx = ">=0.28.1,<0.29"
 lxml = ">=6.0.2,<7"
 geopandas = ">=1.1.2,<2"
 shapely = ">=2.1.2,<3"
-nodejs = ">=25.2.1,<25.3"
+nodejs = ">=20,<21"
 
 [pypi-dependencies]
 ruff = ">=0.14.10, <0.15"
 pytest = ">=9.0.2, <10"
+playwright = "==1.57.0"
