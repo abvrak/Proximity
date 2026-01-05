@@ -1,18 +1,15 @@
 import './Header.css';
 import { useState } from 'react';
 
-export default function Header() {
+export default function Header({ onSubmitLink, loading, error }) {
     const [linkValue, setLinkValue] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = { url: linkValue };
-
-    const res = await fetch("http://localhost:8000/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        });
+        if (!linkValue) return;
+        if (onSubmitLink) {
+            await onSubmitLink(linkValue);
+        }
     };
 
     return (
@@ -33,10 +30,14 @@ export default function Header() {
                         aria-required="true"
                         value={linkValue}
                         onChange={(e) => setLinkValue(e.target.value)}
+                        disabled={loading}
                     />
-                    <button type="submit" disabled={!linkValue}>Sprawdź</button>
+                    <button type="submit" disabled={!linkValue || loading}>
+                        {loading ? 'Czekaj...' : 'Sprawdź'}
+                    </button>
                 </div>
             </form>
+            {error && <p className="error">{error}</p>}
             <div className="city-chip" aria-label="Aktualny kontekst miejski">
                 <span className="city-chip-dot" aria-hidden="true" />
                 <span className="city-chip-label">Warszawa</span>
