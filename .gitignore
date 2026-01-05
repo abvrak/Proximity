@@ -1,7 +1,7 @@
 # Pixi environments
 .pixi/
 pixi_lock.json
-
+pixi.lock
 # Python
 __pycache__/
 __pycache__
