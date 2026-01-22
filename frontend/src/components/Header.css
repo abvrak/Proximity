@@ -1,9 +1,9 @@
 :root {
-	--bg: #0f172a;
-	--panel: #111827;
-	--text: #e5e7eb;
-	--muted: #94a3b8;
-	--accent: #38bdf8;
+	--bg: #f6f5f2;
+	--panel: #ffffff;
+	--text: #1f2a37;
+	--muted: #6b7280;
+	--accent: #2e7d6b;
 }
 
 .header {
@@ -15,9 +15,9 @@
 	justify-content: space-between;
 	gap: 16px;
 	padding: 16px 24px;
-	background: var(--bg);
+	background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
 	color: var(--text);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 	font-family: 'Segoe UI', sans-serif;
 }
 
@@ -31,7 +31,7 @@
 	font-size: 12px;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: var(--accent);
+	color: #2f7f6c;
 }
 
 .brand-title {
@@ -70,7 +70,8 @@
 	padding: 10px 12px 10px 14px;
 	border-radius: 12px;
 	background: var(--panel);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(31, 42, 55, 0.1);
+	box-shadow: 0 10px 24px rgba(31, 42, 55, 0.08);
 }
 
 .link-form-controls input {
@@ -91,13 +92,14 @@
 	border-radius: 10px;
 	padding: 10px 16px;
 	background: var(--accent);
-	color: #0b1224;
+	color: #f8fafc;
 	font-weight: 700;
 	cursor: pointer;
 }
 
 .link-form-controls button:hover {
 	filter: brightness(1.05);
+	box-shadow: 0 10px 20px rgba(46, 125, 107, 0.25);
 }
 
 .link-form-controls button:active {
@@ -110,8 +112,9 @@
 	gap: 8px;
 	padding: 10px 12px;
 	border-radius: 999px;
-	background: var(--panel);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #ffffff;
+	border: 1px solid rgba(31, 42, 55, 0.1);
+	box-shadow: 0 6px 16px rgba(31, 42, 55, 0.08);
 	color: var(--text);
 }
 
@@ -119,7 +122,7 @@
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background: var(--accent);
+	background: #2f7f6c;
 }
 
 .city-chip-label {

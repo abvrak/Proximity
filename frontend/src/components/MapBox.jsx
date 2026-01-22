@@ -7,9 +7,9 @@ export default function MapBox({ point }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const marker = useRef(null);
-  const lng = 21.012; // Warszawa
-  const lat = 52.230;
-  const zoom = 12;
+  const lng = 22.560; // Warszawa
+  const lat = 51.236;
+  const zoom = 12.5;
 
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -18,7 +18,7 @@ export default function MapBox({ point }) {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       center: [lng, lat],
       zoom: zoom,
     });
@@ -31,7 +31,9 @@ export default function MapBox({ point }) {
       map.current = null;
     };
   }, []);
+  
 
+  // Pinezka
   useEffect(() => {
     if (!map.current) return;
     if (!point) return;

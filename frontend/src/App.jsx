@@ -7,7 +7,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (url) => {
+  const handleSubmit = async (address) => {
     setLoading(true);
     setError('');
 
@@ -15,7 +15,7 @@ function App() {
       const res = await fetch('http://localhost:8000/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ address }),
       });
 
       const data = await res.json();
@@ -40,7 +40,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <Header onSubmitLink={handleSubmit} loading={loading} error={error} />
+        <Header onSubmitAddress={handleSubmit} loading={loading} error={error} />
       </header>
       
       <main>

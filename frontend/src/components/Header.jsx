@@ -1,14 +1,14 @@
 import './Header.css';
 import { useState } from 'react';
 
-export default function Header({ onSubmitLink, loading, error }) {
-    const [linkValue, setLinkValue] = useState('');
+export default function Header({ onSubmitAddress, loading, error }) {
+    const [addressValue, setAddressValue] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!linkValue) return;
-        if (onSubmitLink) {
-            await onSubmitLink(linkValue);
+        if (!addressValue) return;
+        if (onSubmitAddress) {
+            await onSubmitAddress(addressValue);
         }
     };
 
@@ -19,20 +19,20 @@ export default function Header({ onSubmitLink, loading, error }) {
                 <h1 className="brand-title">Proximity</h1>
                 <p className="brand-subtitle">Realna wartość nieruchomości</p>
             </div>
-            <form className="link-form" aria-label="Analiza linku nieruchomości" onSubmit={handleSubmit}>
-                <label className="link-form-label" htmlFor="listing-link">Wklej link do ogłoszenia</label>
+            <form className="link-form" aria-label="Analiza adresu nieruchomości" onSubmit={handleSubmit}>
+                <label className="link-form-label" htmlFor="listing-address">Wpisz adres budynku</label>
                 <div className="link-form-controls">
                     <input
-                        id="listing-link"
-                        name="listing-link"
-                        type="url"
-                        placeholder="np. https://www.olx.pl/nieruchomosci/..."
+                        id="listing-address"
+                        name="listing-address"
+                        type="text"
+                        placeholder="np. Gliniana 27, Lublin"
                         aria-required="true"
-                        value={linkValue}
-                        onChange={(e) => setLinkValue(e.target.value)}
+                        value={addressValue}
+                        onChange={(e) => setAddressValue(e.target.value)}
                         disabled={loading}
                     />
-                    <button type="submit" disabled={!linkValue || loading}>
+                    <button type="submit" disabled={!addressValue || loading}>
                         {loading ? 'Czekaj...' : 'Sprawdź'}
                     </button>
                 </div>
@@ -40,7 +40,7 @@ export default function Header({ onSubmitLink, loading, error }) {
             {error && <p className="error">{error}</p>}
             <div className="city-chip" aria-label="Aktualny kontekst miejski">
                 <span className="city-chip-dot" aria-hidden="true" />
-                <span className="city-chip-label">Warszawa</span>
+                <span className="city-chip-label">Lublin</span>
             </div>
         </header>
     );
