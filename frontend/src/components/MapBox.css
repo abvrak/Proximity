@@ -2,3 +2,46 @@
   width: 100%;
   height: 100vh;
 }
+
+.main-marker {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #ff5a1f;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.35);
+}
+
+.poi-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.35);
+  border: 2px solid #ffffff;
+}
+
+.poi-popup {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-width: 160px;
+}
+
+.poi-popup-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.poi-popup-meta {
+  font-size: 12px;
+  color: #475569;
+}
+
+.poi-popup-distance {
+  font-size: 12px;
+  color: #0f172a;
+  margin-top: 6px;
+}

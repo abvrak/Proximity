@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from backend.api.routes.contact import router as contact_router
+from backend.api.routes.proximity import router as proximity_router
 
 app = FastAPI(
     title="Proximity API",
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(contact_router)
+app.include_router(proximity_router)
 
 if __name__ == "__main__":
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)

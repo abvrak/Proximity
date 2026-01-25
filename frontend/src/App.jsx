@@ -4,6 +4,7 @@ import Header from './components/Header';
 
 function App() {
   const [point, setPoint] = useState(null);
+  const [pois, setPois] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -12,26 +13,30 @@ function App() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8000/api/contact', {
+      const res = await fetch('http://localhost:8000/api/proximity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address }),
       });
 
       const data = await res.json();
-      const lat = Number(data?.data?.lat);
-      const lon = Number(data?.data?.lon);
-      const price = data?.data?.price_pln;
+      const lat = Number(data?.location?.lat);
+      const lon = Number(data?.location?.lon);
+      const score = data?.score;
+      const receivedPois = Array.isArray(data?.pois) ? data.pois : [];
 
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
-        setPoint({ lat, lon, price });
+        setPoint({ lat, lon, score });
+        setPois(receivedPois);
       } else {
         setPoint(null);
+        setPois([]);
         setError('Brak współrzędnych w odpowiedzi');
       }
     } catch (e) {
       setError('Coś poszło nie tak');
       setPoint(null);
+      setPois([]);
     } finally {
       setLoading(false);
     }
@@ -44,7 +49,7 @@ function App() {
       </header>
       
       <main>
-        <MapBox point={point} />
+        <MapBox point={point} pois={pois} />
       </main>
     </div>
   );
