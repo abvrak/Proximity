@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MapBox from './components/MapBox';
 import Header from './components/Header';
+import './App.css'; // Upewnij się, że masz import stylów!
 
 function App() {
   const [point, setPoint] = useState(null);
@@ -44,11 +45,10 @@ function App() {
 
   return (
     <div className="app">
-      <header>
-        <Header onSubmitAddress={handleSubmit} loading={loading} error={error} />
-      </header>
       
-      <main>
+      <Header onSubmitAddress={handleSubmit} loading={loading} error={error} />
+      
+      <main className="map-container">
         <MapBox point={point} pois={pois} />
       </main>
     </div>

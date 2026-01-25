@@ -103,22 +103,18 @@ export default function MapBox({ point, pois }) {
     });
 
     return () => {
+      
       if (marker.current) marker.current.remove();
       poiMarkers.current.forEach((poiMarker) => poiMarker.remove());
       poiMarkers.current = [];
-      if (map.current.getLayer(CIRCLE_OUTLINE_LAYER_ID)) {
-        map.current.removeLayer(CIRCLE_OUTLINE_LAYER_ID);
+
+
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
       }
-      if (map.current.getLayer(CIRCLE_FILL_LAYER_ID)) {
-        map.current.removeLayer(CIRCLE_FILL_LAYER_ID);
-      }
-      if (map.current.getSource(CIRCLE_SOURCE_ID)) {
-        map.current.removeSource(CIRCLE_SOURCE_ID);
-      }
-      map.current.remove();
-      map.current = null;
     };
-  }, []);
+  }, []); 
   
 
   // Pinezka
@@ -197,5 +193,5 @@ export default function MapBox({ point, pois }) {
     });
   }, [pois]);
 
-  return <div ref={mapContainer} className="map-container" />;
-}
+
+return <div ref={mapContainer} className="map-root" />;}

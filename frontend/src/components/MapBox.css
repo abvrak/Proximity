@@ -1,7 +1,11 @@
-.map-container {
+.map-root {
   width: 100%;
-  height: 100vh;
+  height: 100%; 
+  position: absolute; 
+  top: 0;
+  left: 0;
 }
+
 
 .main-marker {
   width: 38px;
@@ -10,6 +14,8 @@
   background: #ff5a1f;
   border: 4px solid #ffffff;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.35);
+  z-index: 10; 
+  cursor: pointer;
 }
 
 .poi-marker {
