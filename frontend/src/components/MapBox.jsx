@@ -398,4 +398,24 @@ export default function MapBox({ point, pois, is3D }) {
   }, [pois]);
 
 
-return <div ref={mapContainer} className="map-root" />;}
+  const legendItems = Object.entries(CATEGORY_META);
+
+  return (
+    <div className="map-wrapper">
+      <div ref={mapContainer} className="map-root" />
+      <div className="poi-legend">
+        <div className="poi-legend-title">Legenda POI</div>
+        <div className="poi-legend-items">
+          {legendItems.map(([key, meta]) => (
+            <div key={key} className="poi-legend-item">
+              <span className="poi-legend-icon" style={{ backgroundColor: meta.color }}>
+                {meta.icon}
+              </span>
+              <span className="poi-legend-label">{meta.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
