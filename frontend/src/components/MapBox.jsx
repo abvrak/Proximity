@@ -289,7 +289,11 @@ export default function MapBox({ point, pois, is3D }) {
     marker.current.setLngLat([point.lon, point.lat]).addTo(map.current);
 
     if (Number.isFinite(point.score)) {
-      const popup = new mapboxgl.Popup({ offset: 10 }).setText(`Proximity score: ${point.score}`);
+      const numericScore = Number(point.score);
+      const formattedScore = Number.isFinite(numericScore) && numericScore === 10
+        ? '10'
+        : numericScore.toFixed(2);
+      const popup = new mapboxgl.Popup({ offset: 10 }).setText(`Proximity score: ${formattedScore}/10`);
       marker.current.setPopup(popup);
       marker.current.togglePopup();
     }

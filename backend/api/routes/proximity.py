@@ -199,10 +199,10 @@ async def proximity(payload: ProximityRequest):
         raw = breakdown[category]["raw"]
         weight = cfg["weight"]
         category_score = raw * weight
-        breakdown[category]["score"] = round(category_score * 100, 2)
+        breakdown[category]["score"] = round(category_score * 10, 2)
         weighted_score += category_score
 
-    final_score = round((weighted_score / total_weight) * 100, 1) if total_weight > 0 else 0.0
+    final_score = round(min(10.0, (weighted_score / total_weight) * 10), 2) if total_weight > 0 else 0.0
 
     return {
         "status": "ok",
