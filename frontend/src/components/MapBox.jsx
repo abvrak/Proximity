@@ -13,15 +13,21 @@ const CATEGORY_META = {
   services: { label: 'Usługi', icon: '🏦', color: '#14b8a6' },
 };
 
-export default function MapBox({ point, pois }) {
+export default function MapBox({ point, pois, is3D }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const marker = useRef(null);
   const poiMarkers = useRef([]);
+  const routeRequestId = useRef(0);
   const CIRCLE_SOURCE_ID = 'main-point-radius-source';
   const CIRCLE_FILL_LAYER_ID = 'main-point-radius-fill';
   const CIRCLE_OUTLINE_LAYER_ID = 'main-point-radius-outline';
   const CIRCLE_RADIUS_METERS = 1000;
+  const BUILDINGS_LAYER_ID = '3d-buildings-layer';
+  const ROUTE_SOURCE_ID_DRIVING = 'route-source-driving';
+  const ROUTE_LAYER_ID_DRIVING = 'route-layer-driving';
+  const ROUTE_SOURCE_ID_WALKING = 'route-source-walking';
+  const ROUTE_LAYER_ID_WALKING = 'route-layer-walking';
   const lng = 22.560; // Lublin
   const lat = 51.236;
   const zoom = 12.5;
@@ -84,6 +90,129 @@ export default function MapBox({ point, pois }) {
     });
   };
 
+  const ensure3DBuildingsLayer = () => {
+    if (!map.current || map.current.getLayer(BUILDINGS_LAYER_ID)) return;
+    if (!map.current.getSource('composite')) return;
+
+    const labelLayerId = map.current
+      .getStyle()
+      ?.layers?.find((layer) => layer.type === 'symbol' && layer.layout?.['text-field'])?.id;
+
+    map.current.addLayer(
+      {
+        id: BUILDINGS_LAYER_ID,
+        source: 'composite',
+        'source-layer': 'building',
+        type: 'fill-extrusion',
+        minzoom: 15,
+        filter: ['==', 'extrude', 'true'],
+        paint: {
+          'fill-extrusion-color': '#f7efe3',
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],
+          'fill-extrusion-opacity': 0.85,
+        },
+      },
+      labelLayerId
+    );
+  };
+
+  const ensureRouteLayers = () => {
+    if (!map.current) return;
+
+    if (!map.current.getSource(ROUTE_SOURCE_ID_DRIVING)) {
+      map.current.addSource(ROUTE_SOURCE_ID_DRIVING, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+    }
+
+    if (!map.current.getSource(ROUTE_SOURCE_ID_WALKING)) {
+      map.current.addSource(ROUTE_SOURCE_ID_WALKING, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+    }
+
+    if (!map.current.getLayer(ROUTE_LAYER_ID_DRIVING)) {
+      map.current.addLayer({
+        id: ROUTE_LAYER_ID_DRIVING,
+        type: 'line',
+        source: ROUTE_SOURCE_ID_DRIVING,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': '#0ea5e9',
+          'line-width': 4,
+          'line-opacity': 0.9,
+        },
+      });
+    }
+
+    if (!map.current.getLayer(ROUTE_LAYER_ID_WALKING)) {
+      map.current.addLayer({
+        id: ROUTE_LAYER_ID_WALKING,
+        type: 'line',
+        source: ROUTE_SOURCE_ID_WALKING,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': '#22c55e',
+          'line-width': 3,
+          'line-opacity': 0.85,
+          'line-dasharray': [1.2, 1.2],
+        },
+      });
+    }
+  };
+
+  const clearRoutes = () => {
+    if (!map.current) return;
+    const drivingSource = map.current.getSource(ROUTE_SOURCE_ID_DRIVING);
+    if (drivingSource) drivingSource.setData({ type: 'FeatureCollection', features: [] });
+    const walkingSource = map.current.getSource(ROUTE_SOURCE_ID_WALKING);
+    if (walkingSource) walkingSource.setData({ type: 'FeatureCollection', features: [] });
+  };
+
+  const fetchRouteGeoJson = async (profile, from, to) => {
+    const token = import.meta.env.VITE_MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${from[0]},${from[1]};${to[0]},${to[1]}?overview=full&geometries=geojson&access_token=${token}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Directions request failed');
+    const data = await response.json();
+    const route = data?.routes?.[0];
+    const durationSeconds = route?.duration;
+    const geometry = route?.geometry;
+    if (!geometry || !Number.isFinite(durationSeconds)) throw new Error('Invalid directions response');
+
+    return {
+      geojson: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry,
+            properties: {},
+          },
+        ],
+      },
+      minutes: Math.max(1, Math.ceil(durationSeconds / 60)),
+    };
+  };
+
+
+  const remove3DBuildingsLayer = () => {
+    if (!map.current) return;
+    if (map.current.getLayer(BUILDINGS_LAYER_ID)) {
+      map.current.removeLayer(BUILDINGS_LAYER_ID);
+    }
+  };
+
+
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -100,6 +229,11 @@ export default function MapBox({ point, pois }) {
 
     map.current.on('load', () => {
       ensureRadiusLayer();
+      ensureRouteLayers();
+      if (is3D) {
+        ensure3DBuildingsLayer();
+        map.current.easeTo({ pitch: 60, bearing: 20, duration: 800 });
+      }
     });
 
     return () => {
@@ -115,7 +249,31 @@ export default function MapBox({ point, pois }) {
       }
     };
   }, []); 
-  
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    if (map.current.isStyleLoaded()) {
+      if (is3D) {
+        ensure3DBuildingsLayer();
+        map.current.easeTo({ pitch: 60, bearing: 20, duration: 600 });
+      } else {
+        remove3DBuildingsLayer();
+        map.current.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+      }
+    } else {
+      map.current.once('load', () => {
+        if (is3D) {
+          ensure3DBuildingsLayer();
+          map.current.easeTo({ pitch: 60, bearing: 20, duration: 600 });
+        } else {
+          remove3DBuildingsLayer();
+          map.current.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+        }
+      });
+    }
+  }, [is3D]);
+
 
   // Pinezka
   useEffect(() => {
@@ -138,17 +296,21 @@ export default function MapBox({ point, pois }) {
 
     if (map.current.isStyleLoaded()) {
       ensureRadiusLayer();
+      ensureRouteLayers();
       const source = map.current.getSource(CIRCLE_SOURCE_ID);
       if (source) {
         source.setData(createCircleGeoJson([point.lon, point.lat], CIRCLE_RADIUS_METERS));
       }
+      clearRoutes();
     } else {
       map.current.once('load', () => {
         ensureRadiusLayer();
+        ensureRouteLayers();
         const source = map.current.getSource(CIRCLE_SOURCE_ID);
         if (source) {
           source.setData(createCircleGeoJson([point.lon, point.lat], CIRCLE_RADIUS_METERS));
         }
+        clearRoutes();
       });
     }
 
@@ -175,6 +337,48 @@ export default function MapBox({ point, pois }) {
       el.className = `poi-marker poi-${poi.category || 'default'}`;
       el.textContent = meta.icon;
       el.style.backgroundColor = meta.color;
+
+      el.addEventListener('click', async () => {
+        if (!map.current || !point) return;
+        const from = [Number(point.lon), Number(point.lat)];
+        const to = [Number(poi.lon), Number(poi.lat)];
+        if (!Number.isFinite(from[0]) || !Number.isFinite(from[1])) return;
+        if (!Number.isFinite(to[0]) || !Number.isFinite(to[1])) return;
+
+        const requestId = ++routeRequestId.current;
+
+        try {
+          ensureRouteLayers();
+
+          const [driving, walking] = await Promise.all([
+            fetchRouteGeoJson('driving', from, to),
+            fetchRouteGeoJson('walking', from, to),
+          ]);
+          if (requestId !== routeRequestId.current) return;
+
+          const drivingSource = map.current.getSource(ROUTE_SOURCE_ID_DRIVING);
+          if (drivingSource) drivingSource.setData(driving.geojson);
+
+          const walkingSource = map.current.getSource(ROUTE_SOURCE_ID_WALKING);
+          if (walkingSource) walkingSource.setData(walking.geojson);
+
+          const html = `<div class="poi-popup">
+              <div class="poi-popup-title">${poi.name || 'POI'}</div>
+              <div class="poi-popup-meta">${meta.label}${poi.kind ? ` • ${poi.kind}` : ''}</div>
+              <div class="poi-popup-time">
+                <span class="poi-time-badge poi-time-walk">🚶 ${walking.minutes} min</span>
+                <span class="poi-time-badge poi-time-drive">🚗 ${driving.minutes} min</span>
+              </div>
+            </div>`;
+
+          new mapboxgl.Popup({ offset: 12 })
+            .setLngLat(to)
+            .setHTML(html)
+            .addTo(map.current);
+        } catch (error) {
+          clearRoutes();
+        }
+      });
 
       const popup = new mapboxgl.Popup({ offset: 12 }).setHTML(
         `<div class="poi-popup">

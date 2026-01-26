@@ -8,6 +8,7 @@ function App() {
   const [pois, setPois] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [is3D, setIs3D] = useState(false);
 
   const handleSubmit = async (address) => {
     setLoading(true);
@@ -49,7 +50,21 @@ function App() {
       <Header onSubmitAddress={handleSubmit} loading={loading} error={error} />
       
       <main className="map-container">
-        <MapBox point={point} pois={pois} />
+        <MapBox
+          point={point}
+          pois={pois}
+          is3D={is3D}
+        />
+        <aside className="map-controls">
+          <label className="map-controls__item">
+            <input
+              type="checkbox"
+              checked={is3D}
+              onChange={(event) => setIs3D(event.target.checked)}
+            />
+            <span>Widok 3D</span>
+          </label>
+        </aside>
       </main>
     </div>
   );

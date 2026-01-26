@@ -51,3 +51,46 @@
   color: #0f172a;
   margin-top: 6px;
 }
+
+.poi-popup-time {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.poi-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.poi-time-walk {
+  color: #16a34a;
+}
+
+.poi-time-drive {
+  color: #0ea5e9;
+}
+
+.poi-popup-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #334155;
+}
+
+.poi-popup-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.poi-popup-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+}
