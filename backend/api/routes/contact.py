@@ -13,6 +13,9 @@ async def contact(payload: ContactRequest):
     address = payload.address.strip()
     if not address:
         raise HTTPException(status_code=400, detail="Address is required")
+    # Dodaj "Lublin, Polska" jeśli nie ma tego w adresie
+    if "lublin" not in address.lower():
+        address = f"{address}, Lublin, Polska"
 
     params = {
         "format": "json",

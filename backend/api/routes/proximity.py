@@ -82,6 +82,9 @@ def primary_tag(tags: dict) -> tuple[str, str] | None:
 
 
 async def geocode_address(address: str) -> tuple[float, float]:
+    # Dodaj "Lublin, Polska" jeśli nie ma tego w adresie
+    if "lublin" not in address.lower():
+        address = f"{address}, Lublin, Polska"
     params = {
         "format": "json",
         "limit": 1,
