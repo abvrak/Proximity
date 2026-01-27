@@ -30,7 +30,7 @@ CATEGORIES = {
         "amenity": {"school", "university", "college", "kindergarten"},
     },
     "transport": {
-        "weight": 0.8,
+        "weight": 0.40,
         "public_transport": {"station", "stop_position", "platform"},
         "railway": {"station", "tram_stop", "subway_entrance"},
         "amenity": {"bus_station"},
@@ -43,6 +43,12 @@ CATEGORIES = {
         "weight": 0.6,
         "amenity": {"bank", "atm", "post_office", "police", "fire_station"},
         "shop": {"mall", "department_store", "clothes", "shoes", "chemist"},
+    },
+    "undesirable": {
+        "weight": 1.0,
+        "landuse": {"landfill", "industrial"},
+        "amenity": {"prison", "waste_transfer_station", "waste_disposal"},
+        "man_made": {"works", "wastewater_plant"},
     },
 }
 
@@ -82,7 +88,7 @@ def primary_tag(tags: dict) -> tuple[str, str] | None:
 
 
 async def geocode_address(address: str) -> tuple[float, float]:
-    # Dodaj "Lublin, Polska" jeśli nie ma tego w adresie
+    # Add "Lublin, Poland" if not present in the address
     if "lublin" not in address.lower():
         address = f"{address}, Lublin, Polska"
     params = {
@@ -127,15 +133,26 @@ async def fetch_pois(lat: float, lon: float, radius_m: int) -> list[dict]:
 );
 out center;
 """
-    async with httpx.AsyncClient(
-        timeout=30.0,
-        headers={"User-Agent": "Proximity/0.1"},
-    ) as client:
-        response = await client.post(OVERPASS_URL, data=query)
-        response.raise_for_status()
-        data = response.json()
-
-    return data.get("elements", [])
+    import asyncio
+    retries = 3
+    delay = 0.5
+    last_exc = None
+    for attempt in range(1, retries + 1):
+        try:
+            async with httpx.AsyncClient(
+                timeout=30.0,
+                headers={"User-Agent": "Proximity/0.1"},
+            ) as client:
+                response = await client.post(OVERPASS_URL, data=query)
+                response.raise_for_status()
+                data = response.json()
+            return data.get("elements", [])
+        except Exception as exc:
+            last_exc = exc
+            if attempt < retries:
+                await asyncio.sleep(delay)
+            else:
+                raise
 
 
 @router.post("/proximity")
@@ -198,14 +215,62 @@ async def proximity(payload: ProximityRequest):
     total_weight = sum(cfg["weight"] for cfg in CATEGORIES.values())
     weighted_score = 0.0
 
+
     for category, cfg in CATEGORIES.items():
         raw = breakdown[category]["raw"]
+        count = breakdown[category]["count"]
         weight = cfg["weight"]
-        category_score = raw * weight
+        if count <= 10:
+            effective_raw = raw
+        else:
+            # First 10 objects full value, the rest only 20% of the value
+            if count > 0:
+                avg = raw / count
+            else:
+                avg = 0.0
+            effective_raw = avg * 10 + avg * 0.2 * (count - 10)
+        category_score = effective_raw * weight
         breakdown[category]["score"] = round(category_score * 10, 2)
         weighted_score += category_score
 
-    final_score = round(min(10.0, (weighted_score / total_weight) * 10), 2) if total_weight > 0 else 0.0
+    # --- PENALTIES ---
+    # 1. Missing categories (except undesirable)
+    penalty_per_missing_category = 1.0
+    missing_categories = [cat for cat in CATEGORIES if cat != "undesirable" and breakdown[cat]["count"] == 0]
+    penalty_missing = len(missing_categories) * penalty_per_missing_category
+
+    # 2. Unbalanced POI: if one category > 60% of all POI (except undesirable)
+    total_pois = sum(breakdown[cat]["count"] for cat in CATEGORIES if cat != "undesirable")
+    penalty_unbalanced = 0.0
+    if total_pois > 0:
+        for cat in CATEGORIES:
+            if cat == "undesirable":
+                continue
+            share = breakdown[cat]["count"] / total_pois
+            if share > 0.6:
+                penalty_unbalanced += 1.5
+
+    # 3. Undesirable POIs
+    penalty_undesirable = breakdown["undesirable"]["count"] * 1.0
+
+    # 4. Lack of diversity: less than 6 present categories (except undesirable)
+    present_categories = [cat for cat in CATEGORIES if cat != "undesirable" and breakdown[cat]["count"] > 0]
+    penalty_diversity = 0.0
+    if len(present_categories) < 6:
+        penalty_diversity = 2.0
+
+    total_penalty = penalty_missing + penalty_unbalanced + penalty_undesirable + penalty_diversity
+
+
+    score_scaling = 0.35
+
+
+    raw_score = ((weighted_score / total_weight) * 10 * score_scaling) if total_weight > 0 else 0.0
+    penalized_score = raw_score - total_penalty
+    if weighted_score > 0:
+        final_score = round(max(1.0, min(10.0, penalized_score)), 2)
+    else:
+        final_score = 0.0
 
     return {
         "status": "ok",
@@ -215,4 +280,11 @@ async def proximity(payload: ProximityRequest):
         "score": final_score,
         "pois": pois,
         "breakdown": breakdown,
+        "penalties": {
+            "missing_categories": penalty_missing,
+            "unbalanced": penalty_unbalanced,
+            "undesirable": penalty_undesirable,
+            "diversity": penalty_diversity,
+            "total": total_penalty,
+        },
     }

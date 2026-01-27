@@ -13,7 +13,7 @@ const CATEGORY_META = {
   services: { label: 'Usługi', icon: '🏦', color: '#14b8a6' },
 };
 
-export default function MapBox({ point, pois, is3D }) {
+export default function MapBox({ point, pois, is3D, breakdown = {}, penalties = {} }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const marker = useRef(null);
@@ -275,7 +275,8 @@ export default function MapBox({ point, pois, is3D }) {
   }, [is3D]);
 
 
-  // Pinezka
+
+  // Pinezka z rozbudowanym popupem
   useEffect(() => {
     if (!map.current) return;
     if (!point) return;
@@ -288,15 +289,33 @@ export default function MapBox({ point, pois, is3D }) {
 
     marker.current.setLngLat([point.lon, point.lat]).addTo(map.current);
 
+    // Przygotuj szczegółowy HTML do popupu
+    let html = '';
     if (Number.isFinite(point.score)) {
       const numericScore = Number(point.score);
       const formattedScore = Number.isFinite(numericScore) && numericScore === 10
         ? '10'
         : numericScore.toFixed(2);
-      const popup = new mapboxgl.Popup({ offset: 10 }).setText(`Proximity score: ${formattedScore}/10`);
-      marker.current.setPopup(popup);
-      marker.current.togglePopup();
+      html += `<div class="main-popup-score"><b>Proximity score:</b> ${formattedScore}/10</div>`;
     }
+
+
+    // Procentowy wkład kategorii w końcowy score
+    // Suma score wszystkich kategorii (łącznie z undesirable)
+    let totalScore = 0;
+    Object.entries(breakdown).forEach(([cat, val]) => {
+      totalScore += typeof val.score === 'number' ? val.score : 0;
+    });
+    html += '<div class="main-popup-breakdown"><b>Wkład kategorii w wynik:</b><ul style="margin:0 0 0 1em;padding:0">';
+    Object.entries(breakdown).forEach(([cat, val]) => {
+      const percent = totalScore > 0 ? ((val.score ?? 0) / totalScore * 100).toFixed(1) : '0.0';
+      html += `<li>${cat}: ${percent}%</li>`;
+    });
+    html += '</ul></div>';
+
+    const popup = new mapboxgl.Popup({ offset: 10 }).setHTML(`<div class="main-popup">${html}</div>`);
+    marker.current.setPopup(popup);
+    marker.current.togglePopup();
 
     if (map.current.isStyleLoaded()) {
       ensureRadiusLayer();
@@ -319,7 +338,7 @@ export default function MapBox({ point, pois, is3D }) {
     }
 
     map.current.flyTo({ center: [point.lon, point.lat], zoom: 14 });
-  }, [point]);
+  }, [point, breakdown, penalties]);
 
   // POI markery
   useEffect(() => {
