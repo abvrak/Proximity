@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import os
 from backend.api.routes.contact import router as contact_router
 from backend.api.routes.proximity import router as proximity_router
 
@@ -11,11 +12,22 @@ app = FastAPI(
 )
 
 # Konfiguracja CORS (kluczowe, żeby React mógł gadać z Pythonem)
-origins = [
-    "http://localhost:3000",  # Domyślny port Reacta
-    "http://localhost:5173",  # Vite dev
-    "http://localhost:4173",  # Vite preview
+# Domyślne origins (lokalny rozwój)
+default_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:4173",
 ]
+
+# Pozwól na ustawienie produkcyjnych originów przez zmienną środowiskową
+# Przykład: ALLOWED_ORIGINS="https://app.vercel.app,https://www.example.com"
+env_origins = os.getenv("ALLOWED_ORIGINS", "")
+if env_origins:
+    # split, strip and ignore empty
+    parsed = [o.strip() for o in env_origins.split(",") if o.strip()]
+    origins = default_origins + parsed
+else:
+    origins = default_origins
 
 app.add_middleware(
     CORSMiddleware,

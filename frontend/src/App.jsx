@@ -5,6 +5,7 @@ import './App.css'; // Upewnij się, że masz import stylów!
 
 
 function App() {
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   const [point, setPoint] = useState(null);
   const [pois, setPois] = useState([]);
   const [breakdown, setBreakdown] = useState({});
@@ -18,7 +19,7 @@ function App() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8000/api/proximity', {
+      const res = await fetch(`${API_BASE}/api/proximity`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address }),
